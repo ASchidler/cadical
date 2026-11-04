@@ -108,6 +108,7 @@ Clause *Internal::new_clause (bool red, int glue) {
   c->vivified = false;
   c->vivify = false;
   c->used = 0;
+  c->last_bump = 0;
 
   c->glue = glue;
   c->size = size;
@@ -158,6 +159,7 @@ void Internal::promote_clause (Clause *c, int new_glue) {
   if (new_glue >= old_glue)
     return;
   c->used = max_used;
+  c->last_bump = stats.conflicts;
   if (old_glue > tier1limit && new_glue <= tier1limit) {
     LOG (c, "promoting with new glue %d to tier1", new_glue);
     stats.promoted1++;

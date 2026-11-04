@@ -48,6 +48,11 @@ void Internal::mark_clauses_to_be_flushed () {
       continue;
     if (c->glue <= tier2limit && used >= max_used - 1)
       continue;
+    if (stats.conflicts - c->last_bump <= opts.reduceblockabs)
+      continue;
+    if (opts.reduceblockrel < 1000 && (stats.conflicts - c->last_bump) < (stats.conflicts - last.reduce.conflicts) * (1000 - opts.reduceblockrel) / 1000) 
+      continue;
+
     mark_garbage (c); // flush unused clauses
     if (c->hyper)
       stats.flush.hyper++;
@@ -112,6 +117,10 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
     if (c->glue <= tier1limit && used)
       continue;
     if (c->glue <= tier2limit && used >= max_used - 1)
+      continue;
+    if (stats.conflicts - c->last_bump <= opts.reduceblockabs)
+      continue;
+    if (opts.reduceblockrel < 1000 && (stats.conflicts - c->last_bump) < (stats.conflicts - last.reduce.conflicts) * (1000 - opts.reduceblockrel) / 1000)
       continue;
     if (c->hyper) {          // Hyper binary and ternary resolvents
       assert (c->size <= 3); // are only kept for one reduce round
