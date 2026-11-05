@@ -57,6 +57,7 @@ struct Clause {
   bool flushed : 1;      // garbage in proof deleted binaries
   bool vivified : 1;     // clause already vivified
   bool vivify : 1;       // clause scheduled to be vivified
+  bool reduce_blocked : 1; // Blocked from being deleted in reduce
 
   // The glucose level ('LBD' or short 'glue') is a heuristic value for the
   // expected usefulness of a learned clause, where smaller glue is consider
@@ -96,7 +97,6 @@ struct Clause {
 
   int size; // Actual size of 'literals' (at least 2).
   int pos;  // Position of last watch replacement [Gent'13].
-  int last_bump; // Conflict count of the last bump.
 
   // This 'flexible array member' is of variadic 'size' (and actually
   // shrunken if strengthened) and keeps the literals close to the header of

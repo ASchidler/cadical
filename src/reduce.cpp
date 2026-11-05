@@ -42,15 +42,15 @@ void Internal::mark_clauses_to_be_flushed () {
     if (c->reason)
       continue; // need to keep reasons
     const unsigned used = c->used;
+    const bool blocked = c->reduce_blocked;
+    c->reduce_blocked = false;
     if (used)
       c->used--;
     if (c->glue <= tier1limit && used)
       continue;
     if (c->glue <= tier2limit && used >= max_used - 1)
       continue;
-    if (stats.conflicts - c->last_bump <= opts.reduceblockabs)
-      continue;
-    if (opts.reduceblockrel < 1000 && (stats.conflicts - c->last_bump) < (stats.conflicts - last.reduce.conflicts) * (1000 - opts.reduceblockrel) / 1000) 
+    if (blocked)
       continue;
 
     mark_garbage (c); // flush unused clauses
@@ -112,16 +112,17 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
     if (c->reason)
       continue; // Need to keep reasons.
     const unsigned used = c->used;
+    const bool blocked = c->reduce_blocked;
+    c->reduce_blocked = false;
     if (used)
       c->used--;
     if (c->glue <= tier1limit && used)
       continue;
     if (c->glue <= tier2limit && used >= max_used - 1)
       continue;
-    if (stats.conflicts - c->last_bump <= opts.reduceblockabs)
+    if (blocked)
       continue;
-    if (opts.reduceblockrel < 1000 && (stats.conflicts - c->last_bump) < (stats.conflicts - last.reduce.conflicts) * (1000 - opts.reduceblockrel) / 1000)
-      continue;
+
     if (c->hyper) {          // Hyper binary and ternary resolvents
       assert (c->size <= 3); // are only kept for one reduce round
       if (!used)

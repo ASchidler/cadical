@@ -363,6 +363,7 @@ struct Internal {
   // A variable is 'active' if it is not eliminated nor fixed.
   //
   bool active (int lit) { return flags (lit).active (); }
+  bool is_reduce_blocked();
 
   int active () const {
     int res = stats.active;
@@ -1941,6 +1942,15 @@ inline bool Internal::search_limits_hit () {
 }
 
 /*------------------------------------------------------------------------*/
+
+inline bool Internal::is_reduce_blocked() {
+  if (lim.reduce - stats.conflicts <= opts.reduceblockabs)
+    return true;
+
+  if (opts.reduceblockrel < 1000 && (lim.reduce - stats.conflicts) < (lim.reduce - last.reduce.conflicts) * (1000 - opts.reduceblockrel) / 1000)
+    return true;
+  return false;
+}
 
 } // namespace CaDiCaL
 

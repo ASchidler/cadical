@@ -225,7 +225,9 @@ int Internal::recompute_glue (Clause *c) {
 inline void Internal::bump_clause (Clause *c) {
   LOG (c, "bumping");
   c->used = max_used;
-  c->last_bump = stats.conflicts;
+  if (is_reduce_blocked())
+    c->reduce_blocked = true;
+
   if (c->hyper)
     return;
   if (!c->redundant)
@@ -535,7 +537,8 @@ Clause *Internal::new_driving_clause (const int glue, int &jump,
     jump = var (clause[1]).level;
     driving_level = var (clause[0]).level;
     res = new_learned_redundant_clause (glue);
-    res->last_bump = stats.conflicts;
+    if (is_reduce_blocked())
+      res->reduce_blocked = true;
     res->used = max_used;
   }
 
@@ -944,7 +947,8 @@ void Internal::otfs_strengthen_clause (Clause *c, int lit, int new_size,
   }
   mini_chain.clear ();
   c->used = max_used;
-  c->last_bump = stats.conflicts;
+  if (is_reduce_blocked())
+    c->reduce_blocked = true;
   LOG (c, "strengthened");
   external->check_shrunken_clause (c);
 }
