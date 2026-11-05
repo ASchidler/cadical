@@ -1944,11 +1944,13 @@ inline bool Internal::search_limits_hit () {
 /*------------------------------------------------------------------------*/
 
 inline bool Internal::is_reduce_blocked() {
-  if (lim.reduce - stats.conflicts <= opts.reduceblockabs)
+  if (lim.reduce - stats.conflicts <= opts.reduceblockabs) {
     return true;
+  }
 
-  if (opts.reduceblockrel < 1000 && (lim.reduce - stats.conflicts) < (lim.reduce - last.reduce.conflicts) * (1000 - opts.reduceblockrel) / 1000)
+  if (opts.reduceblockrel < 1000 && (lim.reduce - stats.conflicts) < (lim.reduce - last.reduce.conflicts) * (1000 - opts.reduceblockrel) / 1000) {
     return true;
+  }
   return false;
 }
 
