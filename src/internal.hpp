@@ -1944,7 +1944,7 @@ inline bool Internal::search_limits_hit () {
 /*------------------------------------------------------------------------*/
 
 inline bool Internal::is_reduce_blocked() {
-  if (lim.reduce - stats.conflicts <= opts.reduceblockabs) {
+  if (opts.reduceblockabs > 0 && lim.reduce - stats.conflicts < opts.reduceblockabs) {
     return true;
   }
 
