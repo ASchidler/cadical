@@ -42,8 +42,9 @@ void Internal::mark_clauses_to_be_flushed () {
     if (c->reason)
       continue; // need to keep reasons
     const unsigned used = c->used;
-    const bool blocked = c->reduce_blocked;
-    c->reduce_blocked = false;
+    const unsigned blocked = c->reduce_blocked;
+    if (blocked)
+      --c->reduce_blocked;
     if (used)
       c->used--;
     if (c->glue <= tier1limit && used)

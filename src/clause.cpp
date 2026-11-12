@@ -107,7 +107,7 @@ Clause *Internal::new_clause (bool red, int glue) {
   c->flushed = false;
   c->vivified = false;
   c->vivify = false;
-  c->reduce_blocked = false;
+  c->reduce_blocked = 0;
   c->used = 0;
 
   c->glue = glue;
@@ -160,7 +160,7 @@ void Internal::promote_clause (Clause *c, int new_glue) {
     return;
   c->used = max_used;
   if (is_reduce_blocked())
-    c->reduce_blocked = true;
+    c->reduce_blocked = 1;
     
   if (old_glue > tier1limit && new_glue <= tier1limit) {
     LOG (c, "promoting with new glue %d to tier1", new_glue);

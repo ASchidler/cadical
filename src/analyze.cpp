@@ -226,7 +226,7 @@ inline void Internal::bump_clause (Clause *c) {
   LOG (c, "bumping");
   c->used = max_used;
   if (is_reduce_blocked())
-    c->reduce_blocked = true;
+    c->reduce_blocked = 1;
 
   if (c->hyper)
     return;
@@ -538,7 +538,9 @@ Clause *Internal::new_driving_clause (const int glue, int &jump,
     driving_level = var (clause[0]).level;
     res = new_learned_redundant_clause (glue);
     if (is_reduce_blocked() || opts.reduceblocklearned)
-      res->reduce_blocked = true;
+      res->reduce_blocked = 1;
+    else if (opts.reduceblocktwice)
+      res->reduce_blocked = 2;
     res->used = max_used;
   }
 
@@ -948,7 +950,7 @@ void Internal::otfs_strengthen_clause (Clause *c, int lit, int new_size,
   mini_chain.clear ();
   c->used = max_used;
   if (is_reduce_blocked())
-    c->reduce_blocked = true;
+    c->reduce_blocked = 1;
   LOG (c, "strengthened");
   external->check_shrunken_clause (c);
 }
