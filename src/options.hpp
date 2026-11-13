@@ -180,13 +180,15 @@ OPTION( reduce,            1,  0,  1,0,0,1, "reduce useless clauses") \
 OPTION( reduceblockabs,    0,  0,  2e9,0,0,1, "block reduce for clauses contributing to the last n conflicts.") \
 OPTION( reduceblocklearned, 0, 0, 1, 0, 0, 1, "block learned clauses in the next reduce.") \
 OPTION( reduceblockrel,    1000,  0,  1000,0,0,1, "block reduce for clauses contributing to the last n/1000 many conflicts since last reduction.") \
-OPTION( reduceblocktwice, 0, 0, 2, 0, 0, 1, "block reduce twice.") \
+OPTION( reduceblocktwice, 0, 0, 1, 0, 0, 1, "block reduce twice.") \
 OPTION( reduceinit,      300,  1,1e6,0,0,1, "initial interval") \
 OPTION( reduceint,        25,  2,1e6,0,0,1, "reduce interval") \
 OPTION( reduceopt,         1,  0,  2,0,0,1, "0=prct,1=sqrt,2=max") \
 OPTION( reducetarget,     75, 10,1e2,0,0,1, "reduce fraction in percent") \
 OPTION( reducetier1glue,   2,  1,2e9,0,0,1, "glue of kept learned clauses") \
+OPTION( reducetier1size,   1,  1,2e9,0,0,1, "size of kept learned clauses") \
 OPTION( reducetier2glue,   6,  1,2e9,0,0,1, "glue of tier two clauses") \
+OPTION( reducetier2size,   1,  1,2e9,0,0,1, "size of tier two clauses") \
 OPTION( reluctant,         1,  0,  1,0,0,1, "stable reluctant doubling restarts") \
 OPTION( reluctantint,   1024,  0,2e9,0,0,1, "reluctant doubling period") \
 OPTION( reluctantmax,1048576,  0,2e9,0,0,1, "maximum reluctant doubling period") \

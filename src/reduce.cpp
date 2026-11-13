@@ -47,9 +47,9 @@ void Internal::mark_clauses_to_be_flushed () {
       --c->reduce_blocked;
     if (used)
       c->used--;
-    if (c->glue <= tier1limit && used)
+    if ((c->glue <= tier1limit || c->size <= opts.reducetier1size) && used)
       continue;
-    if (c->glue <= tier2limit && used >= max_used - 1)
+    if ((c->glue <= tier2limit || c->size <= opts.reducetier2size)  && used >= max_used - 1)
       continue;
     if (blocked)
       continue;
