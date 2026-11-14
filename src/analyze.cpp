@@ -225,6 +225,8 @@ int Internal::recompute_glue (Clause *c) {
 inline void Internal::bump_clause (Clause *c) {
   LOG (c, "bumping");
   c->used = max_used;
+  if (c->reduce_used < 3)
+    ++c->reduce_used;
   if (is_reduce_blocked())
     c->reduce_blocked = 1;
 
@@ -542,6 +544,8 @@ Clause *Internal::new_driving_clause (const int glue, int &jump,
     else if (opts.reduceblocktwice)
       res->reduce_blocked = 2;
     res->used = max_used;
+    if (res->reduce_used < 3)
+      ++res->reduce_used;
   }
 
   LOG ("jump level %d", jump);
@@ -949,6 +953,8 @@ void Internal::otfs_strengthen_clause (Clause *c, int lit, int new_size,
   }
   mini_chain.clear ();
   c->used = max_used;
+  if (c->reduce_used < 3)
+    ++c->reduce_used;
   if (is_reduce_blocked())
     c->reduce_blocked = 1;
   LOG (c, "strengthened");

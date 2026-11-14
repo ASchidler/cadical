@@ -43,15 +43,20 @@ void Internal::mark_clauses_to_be_flushed () {
       continue; // need to keep reasons
     const unsigned used = c->used;
     const unsigned blocked = c->reduce_blocked;
+    const unsigned reduce_used = c->reduce_used;
+    c->reduce_used = 0;
     if (blocked)
       --c->reduce_blocked;
     if (used)
       c->used--;
+
     if ((c->glue <= tier1limit || c->size <= opts.reducetier1size) && used)
       continue;
     if ((c->glue <= tier2limit || c->size <= opts.reducetier2size)  && used >= max_used - 1)
       continue;
     if (blocked)
+      continue;
+    if (opts.reduceblockdouble && reduce_used > 1)
       continue;
 
     mark_garbage (c); // flush unused clauses
@@ -115,13 +120,21 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
     const unsigned used = c->used;
     const bool blocked = c->reduce_blocked;
     c->reduce_blocked = false;
+    const unsigned reduce_used = c->reduce_used;
+    c->reduce_used = 0;
+    if (blocked)
+      --c->reduce_blocked;
+ 
     if (used)
       c->used--;
+ 
     if (c->glue <= tier1limit && used)
       continue;
     if (c->glue <= tier2limit && used >= max_used - 1)
       continue;
     if (blocked)
+      continue;
+    if (opts.reduceblockdouble && reduce_used > 1)
       continue;
 
     if (c->hyper) {          // Hyper binary and ternary resolvents

@@ -950,6 +950,8 @@ Clause *Closure::new_tmp_clause (std::vector<int> &clause) {
   c->vivified = false;
   c->vivify = false;
   c->used = 0;
+  c->reduce_blocked = 0;
+  c->reduce_used = 0;
 
   c->glue = size;
   c->size = size;
