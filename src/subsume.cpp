@@ -296,8 +296,6 @@ inline int Internal::try_to_subsume_clause (Clause *c,
       c->used = d->used;
     if (d->reduce_blocked > c->reduce_blocked)
       c->reduce_blocked = d->reduce_blocked;
-    if (d->reduce_used > c->reduce_used)
-      c->reduce_used = d->reduce_used;
     strengthen_clause (c, -flipped);
     lrat_chain.clear ();
     assert (likely_to_be_kept_clause (c));
