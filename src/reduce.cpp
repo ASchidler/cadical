@@ -154,16 +154,13 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
   PHASE ("reduce", stats.reductions, "reducing %zd clauses %.0f%%", target,
          percent (target, stats.current.redundant));
   
+  lim.keptsize = lim.keptglue = 0;
   if (opts.reducenth) {
     Clause* reference;
-    if (target == stack.size ())
-      reference = stack[stack.size() - 1];
-    else {
-      std::nth_element(stack.begin(), stack.end(), stack.begin() + target, reduce_less_useful ());
-      reference = stack[target];
-    }
+    std::nth_element(stack.begin(), stack.begin()+target-1, stack.end(), reduce_less_useful ());
+    reference = stack[target-1];
     for (auto c : stack) {
-      if (reduce_less_useful()(c, reference)) {
+      if (reduce_less_useful()(reference, c)) {
         LOG (c, "keeping");
         if (c->size > lim.keptsize)
           lim.keptsize = c->size;
@@ -177,31 +174,29 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
     }
     
   } else {
-  sort (stack.begin (), stack.end (), reduce_less_useful ());
-  auto i = stack.begin ();
-  const auto t = i + target;
-  while (i != t) {
-    Clause *c = *i++;
-    LOG (c, "marking useless to be collected");
-    mark_garbage (c);
-    stats.reduced++;
-  }
-
-  lim.keptsize = lim.keptglue = 0;
-
-  const auto end = stack.end ();
-  for (i = t; i != end; i++) {
-    Clause *c = *i;
-    LOG (c, "keeping");
-    if (c->size > lim.keptsize)
-      lim.keptsize = c->size;
-    if (c->glue > lim.keptglue)
-      lim.keptglue = c->glue;
-  }
+    sort (stack.begin (), stack.end (), reduce_less_useful ());
+    auto i = stack.begin ();
+    const auto t = i + target;
+    while (i != t) {
+      Clause *c = *i++;
+      LOG (c, "marking useless to be collected");
+      mark_garbage (c);
+      stats.reduced++;
+    }
+  
+    const auto end = stack.end ();
+    for (i = t; i != end; i++) {
+      Clause *c = *i;
+      LOG (c, "keeping");
+      if (c->size > lim.keptsize)
+        lim.keptsize = c->size;
+      if (c->glue > lim.keptglue)
+        lim.keptglue = c->glue;
+    }
   } 
-
+  
   erase_vector (stack);
-
+  
   PHASE ("reduce", stats.reductions, "maximum kept size %d glue %d",
          lim.keptsize, lim.keptglue);
 }
