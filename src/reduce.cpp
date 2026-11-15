@@ -85,7 +85,11 @@ struct reduce_less_useful {
       return true;
     if (c->glue < d->glue)
       return false;
-    return c->size > d->size;
+    if (c->size > d->size)
+      return true;
+    if (c->size < d->size)
+      return false;
+    return c->id < d->id;
   }
 };
 
@@ -138,7 +142,6 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
     stack.push_back (c);
   }
 
-  stable_sort (stack.begin (), stack.end (), reduce_less_useful ());
   size_t target = 1e-2 * opts.reducetarget * stack.size ();
 
   // This is defensive code, which I usually consider a bug, but here I am
@@ -150,7 +153,31 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
 
   PHASE ("reduce", stats.reductions, "reducing %zd clauses %.0f%%", target,
          percent (target, stats.current.redundant));
-
+  
+  if (opts.reducenth) {
+    Clause* reference;
+    if (target == stack.size ())
+      reference = stack[stack.size() - 1];
+    else {
+      std::nth_element(stack.begin(), stack.end(), stack.begin() + target, reduce_less_useful ());
+      reference = stack[target];
+    }
+    for (auto c : stack) {
+      if (reduce_less_useful()(c, reference)) {
+        LOG (c, "keeping");
+        if (c->size > lim.keptsize)
+          lim.keptsize = c->size;
+        if (c->glue > lim.keptglue)
+          lim.keptglue = c->glue;
+      } else {
+        LOG (c, "marking useless to be collected");
+        mark_garbage (c);
+        stats.reduced++;
+      }
+    }
+    
+  } else {
+  sort (stack.begin (), stack.end (), reduce_less_useful ());
   auto i = stack.begin ();
   const auto t = i + target;
   while (i != t) {
@@ -171,6 +198,7 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
     if (c->glue > lim.keptglue)
       lim.keptglue = c->glue;
   }
+  } 
 
   erase_vector (stack);
 
