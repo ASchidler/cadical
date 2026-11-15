@@ -537,9 +537,12 @@ Clause *Internal::new_driving_clause (const int glue, int &jump,
     jump = var (clause[1]).level;
     driving_level = var (clause[0]).level;
     res = new_learned_redundant_clause (glue);
-    if (is_reduce_blocked() || opts.reduceblocklearned)
+    if (is_reduce_blocked())
       res->reduce_blocked = 1;
-    else if (opts.reduceblocktwice)
+    else if (opts.reduceblocklearned) {
+      if (opts.reduceblocklearnedfrac == 100 || (lim.reduce - stats.conflicts) < (lim.reduce - last.reduce.conflicts) * opts.reduceblocklearnedfrac / 100)
+        res->reduce_blocked = 1;
+    } else if (opts.reduceblocktwice)
       res->reduce_blocked = 2;
     res->used = max_used;
   }

@@ -179,6 +179,7 @@ OPTION( recomputetier,     1,  0,  1,0,0,1, "recompute tiers") \
 OPTION( reduce,            1,  0,  1,0,0,1, "reduce useless clauses") \
 OPTION( reduceblockabs,    0,  0,  2e9,0,0,1, "block reduce for clauses contributing to the last n conflicts.") \
 OPTION( reduceblocklearned, 0, 0, 1, 0, 0, 1, "block learned clauses in the next reduce.") \
+OPTION( reduceblocklearnedfrac, 100, 0, 100, 0, 0, 1, "") \
 OPTION( reduceblockrel,    1000,  0,  1000,0,0,1, "block reduce for clauses contributing to the last n/1000 many conflicts since last reduction.") \
 OPTION( reduceblocktwice, 0, 0, 1, 0, 0, 1, "block reduce twice.") \
 OPTION( reduceinit,      300,  1,1e6,0,0,1, "initial interval") \
