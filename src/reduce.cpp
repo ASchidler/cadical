@@ -116,7 +116,6 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
       continue; // Need to keep reasons.
     const unsigned used = c->used;
     const bool blocked = c->reduce_blocked;
-    c->reduce_blocked = false;
 
     if (blocked)
       --c->reduce_blocked;
