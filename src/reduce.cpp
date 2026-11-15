@@ -2,6 +2,7 @@
 
 namespace CaDiCaL {
 
+
 /*------------------------------------------------------------------------*/
 
 // Once in a while we reduce, e.g., we remove learned clauses which are
@@ -79,17 +80,22 @@ void Internal::mark_clauses_to_be_flushed () {
 // so we moved back to a simpler scheme which also uses 'stable_sort'
 // instead of 'rsort' below.  Sorting here is not a hot-spot anyhow.
 
-struct reduce_less_useful {
-  bool operator() (const Clause *c, const Clause *d) const {
-    if (c->glue > d->glue)
+struct reduce_candidate {
+  int glue;
+  int size;
+  int64_t id;
+  Clause *clause;
+  reduce_candidate(Clause *clause) : glue(clause->glue), size(clause->size), id(clause->id), clause(clause) {}
+  friend bool operator< (const reduce_candidate& c, const reduce_candidate& d) {
+    if (c.glue > d.glue)
       return true;
-    if (c->glue < d->glue)
+    if (c.glue < d.glue)
       return false;
-    if (c->size > d->size)
+    if (c.size > d.size)
       return true;
-    if (c->size < d->size)
+    if (c.size < d.size)
       return false;
-    return c->id < d->id;
+    return c.id < d.id;
   }
 };
 
@@ -105,7 +111,7 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
   // into the candidate selection (more recently learned clauses are kept if
   // they otherwise have the same glue and size).
 
-  vector<Clause *> stack;
+  vector<reduce_candidate> stack;
   const int tier1limit = tier1[false];
   const int tier2limit = max (tier1limit, tier2[false]);
 
@@ -139,7 +145,7 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
         mark_garbage (c); // unless
       continue;           //  used recently.
     }
-    stack.push_back (c);
+    stack.emplace_back (c);
   }
 
   size_t target = 1e-2 * opts.reducetarget * stack.size ();
@@ -156,42 +162,41 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
   
   lim.keptsize = lim.keptglue = 0;
   if (opts.reducenth) {
-    Clause* reference;
-    std::nth_element(stack.begin(), stack.begin()+target-1, stack.end(), reduce_less_useful ());
-    reference = stack[target-1];
+    std::nth_element(stack.begin(), stack.begin()+target-1, stack.end());
+    reduce_candidate& reference = stack[target-1];
     for (auto c : stack) {
-      if (reduce_less_useful()(reference, c)) {
+      if (reference < c) {
         LOG (c, "keeping");
-        if (c->size > lim.keptsize)
-          lim.keptsize = c->size;
-        if (c->glue > lim.keptglue)
-          lim.keptglue = c->glue;
+        if (c.size > lim.keptsize)
+          lim.keptsize = c.size;
+        if (c.glue > lim.keptglue)
+          lim.keptglue = c.glue;
       } else {
         LOG (c, "marking useless to be collected");
-        mark_garbage (c);
+        mark_garbage (c.clause);
         stats.reduced++;
       }
     }
     
   } else {
-    sort (stack.begin (), stack.end (), reduce_less_useful ());
+    sort (stack.begin (), stack.end ());
     auto i = stack.begin ();
     const auto t = i + target;
     while (i != t) {
-      Clause *c = *i++;
-      LOG (c, "marking useless to be collected");
-      mark_garbage (c);
+      reduce_candidate& c = *i++;
+      LOG (c.clause, "marking useless to be collected");
+      mark_garbage (c.clause);
       stats.reduced++;
     }
   
     const auto end = stack.end ();
     for (i = t; i != end; i++) {
-      Clause *c = *i;
-      LOG (c, "keeping");
-      if (c->size > lim.keptsize)
-        lim.keptsize = c->size;
-      if (c->glue > lim.keptglue)
-        lim.keptglue = c->glue;
+      reduce_candidate& c = *i;
+      LOG (c.clause, "keeping");
+      if (c.size > lim.keptsize)
+        lim.keptsize = c.size;
+      if (c.glue > lim.keptglue)
+        lim.keptglue = c.glue;
     }
   } 
   
