@@ -161,25 +161,12 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
          percent (target, stats.current.redundant));
   
   lim.keptsize = lim.keptglue = 0;
+
   if (opts.reducenth) {
     std::nth_element(stack.begin(), stack.begin()+target-1, stack.end());
-    reduce_candidate& reference = stack[target-1];
-    for (auto c : stack) {
-      if (reference < c) {
-        LOG (c, "keeping");
-        if (c.size > lim.keptsize)
-          lim.keptsize = c.size;
-        if (c.glue > lim.keptglue)
-          lim.keptglue = c.glue;
-      } else {
-        LOG (c, "marking useless to be collected");
-        mark_garbage (c.clause);
-        stats.reduced++;
-      }
-    }
-    
   } else {
     sort (stack.begin (), stack.end ());
+  }
     auto i = stack.begin ();
     const auto t = i + target;
     while (i != t) {
@@ -198,7 +185,6 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
       if (c.glue > lim.keptglue)
         lim.keptglue = c.glue;
     }
-  } 
   
   erase_vector (stack);
   
