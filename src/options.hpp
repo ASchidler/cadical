@@ -184,7 +184,6 @@ OPTION( reduceblockrel,    1000,  0,  1000,0,0,1, "block reduce for clauses cont
 OPTION( reduceblocktwice, 0, 0, 1, 0, 0, 1, "block reduce twice.") \
 OPTION( reduceinit,      300,  1,1e6,0,0,1, "initial interval") \
 OPTION( reduceint,        25,  2,1e6,0,0,1, "reduce interval") \
-OPTION( reducenth,         0,  0, 1, 0,0,1, "")\
 OPTION( reduceopt,         1,  0,  2,0,0,1, "0=prct,1=sqrt,2=max") \
 OPTION( reducetarget,     75, 10,1e2,0,0,1, "reduce fraction in percent") \
 OPTION( reducetier1glue,   2,  1,2e9,0,0,1, "glue of kept learned clauses") \

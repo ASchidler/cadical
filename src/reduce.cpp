@@ -111,7 +111,7 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
   // into the candidate selection (more recently learned clauses are kept if
   // they otherwise have the same glue and size).
 
-  vector<reduce_candidate> stack;
+  vector<std::pair<uint64_t, Clause*>> stack;
   const int tier1limit = tier1[false];
   const int tier2limit = max (tier1limit, tier2[false]);
 
@@ -145,7 +145,10 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
         mark_garbage (c); // unless
       continue;           //  used recently.
     }
-    stack.emplace_back (c, stack.size());
+    const uint64_t glue = c->glue;
+    const uint64_t size = c->size;
+    const uint64_t rank = ~((glue << 32) | size);
+    stack.emplace_back (rank, c);
   }
 
   size_t target = 1e-2 * opts.reducetarget * stack.size ();
@@ -162,29 +165,27 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
   
   lim.keptsize = lim.keptglue = 0;
 
-  if (opts.reducenth) {
-    std::nth_element(stack.begin(), stack.begin()+target-1, stack.end());
-  } else {
-    sort (stack.begin (), stack.end ());
+  stable_sort (stack.begin (), stack.end (),[](const auto& lhs, const auto& rhs) {
+        return lhs.first < rhs.first;
+    });
+  auto i = stack.begin ();
+  const auto t = i + target;
+  for (;i != t; i++) {
+    Clause* c = i->second;
+    LOG (c, "marking useless to be collected");
+    mark_garbage (c);
+    stats.reduced++;
   }
-    auto i = stack.begin ();
-    const auto t = i + target;
-    while (i != t) {
-      reduce_candidate& c = *i++;
-      LOG (c.clause, "marking useless to be collected");
-      mark_garbage (c.clause);
-      stats.reduced++;
-    }
   
-    const auto end = stack.end ();
-    for (i = t; i != end; i++) {
-      reduce_candidate& c = *i;
-      LOG (c.clause, "keeping");
-      if (c.size > lim.keptsize)
-        lim.keptsize = c.size;
-      if (c.glue > lim.keptglue)
-        lim.keptglue = c.glue;
-    }
+  const auto end = stack.end ();
+  for (i = t; i != end; i++) {
+    Clause* c = i->second;
+    LOG (c, "keeping");
+    if (c->size > lim.keptsize)
+      lim.keptsize = c->size;
+    if (c->glue > lim.keptglue)
+      lim.keptglue = c->glue;
+  }
   
   erase_vector (stack);
   
