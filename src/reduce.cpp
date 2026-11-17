@@ -83,9 +83,9 @@ void Internal::mark_clauses_to_be_flushed () {
 struct reduce_candidate {
   int glue;
   int size;
-  int64_t id;
+  size_t id;
   Clause *clause;
-  reduce_candidate(Clause *clause) : glue(clause->glue), size(clause->size), id(clause->id), clause(clause) {}
+  reduce_candidate(Clause *clause, size_t id) : glue(clause->glue), size(clause->size), id(id), clause(clause) {}
   friend bool operator< (const reduce_candidate& c, const reduce_candidate& d) {
     if (c.glue > d.glue)
       return true;
@@ -145,7 +145,7 @@ void Internal::mark_useless_redundant_clauses_as_garbage () {
         mark_garbage (c); // unless
       continue;           //  used recently.
     }
-    stack.emplace_back (c);
+    stack.emplace_back (c, stack.size());
   }
 
   size_t target = 1e-2 * opts.reducetarget * stack.size ();
